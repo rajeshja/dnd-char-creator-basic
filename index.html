@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>D&D Beginner Character Builder</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="site-header">
+        <div>
+          <p class="eyebrow">Dungeons &amp; Dragons</p>
+          <h1>Beginner Character Creator</h1>
+          <p class="subtitle">
+            Answer a few simple questions to discover your class, subclass, race, background, and alignment.
+          </p>
+        </div>
+        <button class="ghost-button" id="restart" type="button">Restart</button>
+      </header>
+
+      <main>
+        <section class="question-card" aria-live="polite">
+          <p class="question-label">Question</p>
+          <h2 id="question">Loading your adventure...</h2>
+          <div class="choice-list" id="choices" role="list"></div>
+        </section>
+
+        <section class="summary-card">
+          <header>
+            <h3>Your Character Snapshot</h3>
+            <p class="muted">Updated as you make choices.</p>
+          </header>
+          <ul class="summary-list" id="summary"></ul>
+        </section>
+
+        <section class="result-card" id="result" hidden>
+          <h3>Your Beginner-Friendly D&amp;D Character</h3>
+          <p class="result-text" id="result-text"></p>
+          <div class="result-actions">
+            <button class="primary-button" id="start-over" type="button">Start Over</button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>Level 3 guide • Mobile-first • No backend required</p>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
