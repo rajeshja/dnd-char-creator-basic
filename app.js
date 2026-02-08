@@ -278,6 +278,9 @@ const choicesEl = document.getElementById("choices");
 const summaryEl = document.getElementById("summary");
 const resultCard = document.getElementById("result");
 const resultText = document.getElementById("result-text");
+const copyTextEl = document.getElementById("copy-text");
+const copyButton = document.getElementById("copy-summary");
+const copyStatus = document.getElementById("copy-status");
 const backButton = document.getElementById("back");
 const restartButtons = [
   document.getElementById("restart"),
@@ -306,9 +309,7 @@ const summaryLabels = {
 };
 
 const updateSummary = () => {
-  const alignment = state.selections.alignment_axis1 && state.selections.alignment_axis2
-    ? `${state.selections.alignment_axis1} ${state.selections.alignment_axis2}`
-    : "Not decided yet";
+  const alignment = getAlignment();
 
   const summaryEntries = {
     class: state.selections.class ?? "Not decided yet",
@@ -327,6 +328,24 @@ const updateSummary = () => {
   });
 };
 
+const getAlignment = () =>
+  state.selections.alignment_axis1 && state.selections.alignment_axis2
+    ? `${state.selections.alignment_axis1} ${state.selections.alignment_axis2}`
+    : "Not decided yet";
+
+const buildEmailSummary = () => {
+  const alignment = getAlignment();
+  return [
+    "D&D Character Snapshot",
+    `Level: ${decisionTree.metadata.level}`,
+    `Class: ${state.selections.class ?? "Not decided yet"}`,
+    `Subclass: ${state.selections.subclass ?? "Not decided yet"}`,
+    `Race: ${state.selections.race ?? "Not decided yet"}`,
+    `Background: ${state.selections.background ?? "Not decided yet"}`,
+    `Alignment: ${alignment}`
+  ].join("\n");
+};
+
 const renderNode = () => {
   const node = decisionTree.nodes[state.currentNode];
   if (!node) {
@@ -340,6 +359,9 @@ const renderNode = () => {
   questionNoteEl.textContent = `Step ${history.length + 1}`;
   choicesEl.innerHTML = "";
   resultCard.hidden = true;
+  if (copyStatus) {
+    copyStatus.textContent = "";
+  }
   backButton.disabled = history.length === 0;
 
   node.options.forEach((option) => {
@@ -376,12 +398,18 @@ const handleOption = (option) => {
 };
 
 const showResult = () => {
-  const alignment = `${state.selections.alignment_axis1} ${state.selections.alignment_axis2}`;
+  const alignment = getAlignment();
   resultText.textContent = `You are a level ${decisionTree.metadata.level} ${alignment} ${
     state.selections.race
   } ${state.selections.class} (${state.selections.subclass}) with a ${
     state.selections.background
   } background. A perfect beginner-friendly hero!`;
+  if (copyTextEl) {
+    copyTextEl.value = buildEmailSummary();
+  }
+  if (copyStatus) {
+    copyStatus.textContent = "";
+  }
   resultCard.hidden = false;
   backButton.disabled = history.length === 0;
 };
@@ -414,6 +442,34 @@ const reset = () => {
   renderNode();
 };
 
+const copySummary = async () => {
+  if (!copyTextEl) return;
+  const summaryText = buildEmailSummary();
+  copyTextEl.value = summaryText;
+
+  if (copyStatus) {
+    copyStatus.textContent = "Copying...";
+  }
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(summaryText);
+    } else {
+      copyTextEl.focus();
+      copyTextEl.select();
+      document.execCommand("copy");
+      copyTextEl.setSelectionRange(0, 0);
+    }
+    if (copyStatus) {
+      copyStatus.textContent = "Copied! Paste it into your email.";
+    }
+  } catch (error) {
+    if (copyStatus) {
+      copyStatus.textContent = "Copy failed. You can select the text and copy manually.";
+    }
+  }
+};
+
 if (backButton) {
   backButton.addEventListener("click", goBack);
 }
@@ -422,6 +478,10 @@ restartButtons.forEach((button) => {
   if (!button) return;
   button.addEventListener("click", reset);
 });
+
+if (copyButton) {
+  copyButton.addEventListener("click", copySummary);
+}
 
 updateSummary();
 renderNode();
