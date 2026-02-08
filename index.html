@@ -16,13 +16,17 @@
             Answer a few simple questions to discover your class, subclass, race, background, and alignment.
           </p>
         </div>
-        <button class="ghost-button" id="restart" type="button">Restart</button>
+        <div class="header-actions">
+          <button class="ghost-button" id="back" type="button">Back</button>
+          <button class="ghost-button" id="restart" type="button">Restart</button>
+        </div>
       </header>
 
       <main>
         <section class="question-card" aria-live="polite">
           <p class="question-label">Question</p>
           <h2 id="question">Loading your adventure...</h2>
+          <p class="question-note" id="question-note">Step 1</p>
           <div class="choice-list" id="choices" role="list"></div>
         </section>
 

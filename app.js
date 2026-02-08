@@ -208,10 +208,12 @@ const decisionTree = {
 };
 
 const questionEl = document.getElementById("question");
+const questionNoteEl = document.getElementById("question-note");
 const choicesEl = document.getElementById("choices");
 const summaryEl = document.getElementById("summary");
 const resultCard = document.getElementById("result");
 const resultText = document.getElementById("result-text");
+const backButton = document.getElementById("back");
 const restartButtons = [
   document.getElementById("restart"),
   document.getElementById("start-over")
@@ -228,6 +230,7 @@ let state = {
     alignment_axis2: null
   }
 };
+let history = [];
 
 const summaryLabels = {
   class: "Class",
@@ -264,12 +267,15 @@ const renderNode = () => {
   if (!node) {
     questionEl.textContent = "Your journey is complete.";
     choicesEl.innerHTML = "";
+    questionNoteEl.textContent = "";
     return;
   }
 
   questionEl.textContent = node.question;
+  questionNoteEl.textContent = `Step ${history.length + 1}`;
   choicesEl.innerHTML = "";
   resultCard.hidden = true;
+  backButton.disabled = history.length === 0;
 
   node.options.forEach((option) => {
     const button = document.createElement("button");
@@ -282,6 +288,14 @@ const renderNode = () => {
 };
 
 const handleOption = (option) => {
+  history = [
+    ...history,
+    {
+      currentNode: state.currentNode,
+      selections: { ...state.selections }
+    }
+  ];
+
   if (option.set) {
     state.selections = { ...state.selections, ...option.set };
   }
@@ -304,6 +318,18 @@ const showResult = () => {
     state.selections.background
   } background. A perfect beginner-friendly hero!`;
   resultCard.hidden = false;
+  backButton.disabled = history.length === 0;
+};
+
+const goBack = () => {
+  const previous = history.pop();
+  if (!previous) return;
+  state = {
+    currentNode: previous.currentNode,
+    selections: { ...previous.selections }
+  };
+  updateSummary();
+  renderNode();
 };
 
 const reset = () => {
@@ -318,9 +344,14 @@ const reset = () => {
       alignment_axis2: null
     }
   };
+  history = [];
   updateSummary();
   renderNode();
 };
+
+if (backButton) {
+  backButton.addEventListener("click", goBack);
+}
 
 restartButtons.forEach((button) => {
   if (!button) return;
