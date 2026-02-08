@@ -123,6 +123,13 @@ main {
   outline: none;
 }
 
+.choice-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  border-color: transparent;
+  transform: none;
+}
+
 .summary-card header {
   display: flex;
   justify-content: space-between;

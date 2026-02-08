@@ -266,7 +266,12 @@ const decisionTree = {
       options: [
         { label: "To help others", set: { alignment_axis2: "Good" }, end: true },
         { label: "For balance or practicality", set: { alignment_axis2: "Neutral" }, end: true },
-        { label: "For personal gain", set: { alignment_axis2: "Evil" }, end: true }
+        {
+          label: "For personal gain (not allowed at my table)",
+          set: { alignment_axis2: "Evil" },
+          end: true,
+          disabled: true
+        }
       ]
     }
   }
@@ -369,7 +374,12 @@ const renderNode = () => {
     button.type = "button";
     button.className = "choice-button";
     button.textContent = option.label;
-    button.addEventListener("click", () => handleOption(option));
+    if (option.disabled) {
+      button.disabled = true;
+      button.setAttribute("aria-disabled", "true");
+    } else {
+      button.addEventListener("click", () => handleOption(option));
+    }
     choicesEl.appendChild(button);
   });
 };
