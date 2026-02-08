@@ -41,6 +41,14 @@
         <section class="result-card" id="result" hidden>
           <h3>Your Beginner-Friendly D&amp;D Character</h3>
           <p class="result-text" id="result-text"></p>
+          <div class="copy-block">
+            <label class="copy-label" for="copy-text">Email-friendly summary</label>
+            <textarea id="copy-text" class="copy-text" rows="5" readonly></textarea>
+            <div class="copy-actions">
+              <button class="ghost-button" id="copy-summary" type="button">Copy for Email</button>
+              <span class="copy-status" id="copy-status" role="status" aria-live="polite"></span>
+            </div>
+          </div>
           <div class="result-actions">
             <button class="primary-button" id="start-over" type="button">Start Over</button>
           </div>
