@@ -28,8 +28,8 @@ const decisionTree = {
     ranged_style: {
       question: "How do you attack?",
       options: [
-        { label: "With weapons like bows", set: { class: "Fighter" }, next: "fighter_subclass" },
-        { label: "I hunt and track enemies", set: { class: "Ranger" }, next: "ranger_subclass" },
+        { label: "With weapons like bows and arrows", set: { class: "Fighter" }, next: "fighter_subclass" },
+        { label: "I hunt and track enemies and use bows and arrows", set: { class: "Ranger" }, next: "ranger_subclass" },
         { label: "With magical blasts", next: "magic_origin_ranged" }
       ]
     },
