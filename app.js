@@ -79,14 +79,24 @@ const decisionTree = {
       options: [
         { label: "Master of weapons and tactics", set: { subclass: "Battle Master" }, next: "race_choice" },
         { label: "Natural athlete with incredible stamina", set: { subclass: "Champion" }, next: "race_choice" },
-        { label: "Warrior who blends sword and magic", set: { subclass: "Eldritch Knight" }, next: "race_choice" }
+        { label: "Warrior who blends sword and magic", set: { subclass: "Eldritch Knight" }, next: "race_choice" },
+        { label: "Archer who never misses", set: { subclass: "Arcane Archer" }, next: "race_choice" },
+        { label: "Mounted warrior and battlefield defender", set: { subclass: "Cavalier" }, next: "race_choice" },
+        { label: "Disciplined warrior from a martial tradition", set: { subclass: "Samurai" }, next: "race_choice" },
+        { label: "Psychic-powered warrior", set: { subclass: "Psi Warrior" }, next: "race_choice" },
+        { label: "Runes and giant magic", set: { subclass: "Rune Knight" }, next: "race_choice" }
       ]
     },
     barbarian_subclass: {
       question: "Where does your rage come from?",
       options: [
         { label: "Primal fury and wild instincts", set: { subclass: "Berserker" }, next: "race_choice" },
-        { label: "Spiritual connection to animals", set: { subclass: "Totem Warrior" }, next: "race_choice" }
+        { label: "Spiritual connection to animals", set: { subclass: "Totem Warrior" }, next: "race_choice" },
+        { label: "Ancestral spirits guide you", set: { subclass: "Ancestral Guardian" }, next: "race_choice" },
+        { label: "Rage like a raging storm", set: { subclass: "Storm Herald" }, next: "race_choice" },
+        { label: "Divine mission and righteous fury", set: { subclass: "Zealot" }, next: "race_choice" },
+        { label: "Primal beast within", set: { subclass: "Beast" }, next: "race_choice" },
+        { label: "Wild, chaotic magic erupts", set: { subclass: "Wild Magic" }, next: "race_choice" }
       ]
     },
     monk_subclass: {
@@ -94,14 +104,24 @@ const decisionTree = {
       options: [
         { label: "Perfect martial arts technique", set: { subclass: "Way of the Open Hand" }, next: "race_choice" },
         { label: "Stealth and shadow magic", set: { subclass: "Way of Shadow" }, next: "race_choice" },
-        { label: "Ancient elemental power", set: { subclass: "Way of the Four Elements" }, next: "race_choice" }
+        { label: "Ancient elemental power", set: { subclass: "Way of the Four Elements" }, next: "race_choice" },
+        { label: "Brawler who thrives in a tavern fight", set: { subclass: "Way of the Drunken Master" }, next: "race_choice" },
+        { label: "Martial artist with bladed mastery", set: { subclass: "Way of the Kensei" }, next: "race_choice" },
+        { label: "Radiant spirit and burning soul", set: { subclass: "Way of the Sun Soul" }, next: "race_choice" },
+        { label: "Astral arms and spirit power", set: { subclass: "Way of the Astral Self" }, next: "race_choice" },
+        { label: "Healing hands and deadly strikes", set: { subclass: "Way of Mercy" }, next: "race_choice" }
       ]
     },
     ranger_subclass: {
       question: "What kind of hunter are you?",
       options: [
         { label: "Expert tracker and monster slayer", set: { subclass: "Hunter" }, next: "race_choice" },
-        { label: "Magical beast companion", set: { subclass: "Beast Master" }, next: "race_choice" }
+        { label: "Magical beast companion", set: { subclass: "Beast Master" }, next: "race_choice" },
+        { label: "Ambusher of the darkness", set: { subclass: "Gloom Stalker" }, next: "race_choice" },
+        { label: "Planar explorer and guardian", set: { subclass: "Horizon Walker" }, next: "race_choice" },
+        { label: "Hunter of monstrous threats", set: { subclass: "Monster Slayer" }, next: "race_choice" },
+        { label: "Enchanted wanderer with fey magic", set: { subclass: "Fey Wanderer" }, next: "race_choice" },
+        { label: "Keeper of a swirling swarm", set: { subclass: "Swarmkeeper" }, next: "race_choice" }
       ]
     },
     rogue_subclass: {
@@ -109,14 +129,25 @@ const decisionTree = {
       options: [
         { label: "Classic thief and infiltrator", set: { subclass: "Thief" }, next: "race_choice" },
         { label: "Precise and deadly assassin", set: { subclass: "Assassin" }, next: "race_choice" },
-        { label: "Trickster with a touch of magic", set: { subclass: "Arcane Trickster" }, next: "race_choice" }
+        { label: "Trickster with a touch of magic", set: { subclass: "Arcane Trickster" }, next: "race_choice" },
+        { label: "Detective and mystery solver", set: { subclass: "Inquisitive" }, next: "race_choice" },
+        { label: "Master manipulator and schemer", set: { subclass: "Mastermind" }, next: "race_choice" },
+        { label: "Scout and wilderness skirmisher", set: { subclass: "Scout" }, next: "race_choice" },
+        { label: "Daring swashbuckler", set: { subclass: "Swashbuckler" }, next: "race_choice" },
+        { label: "Haunted by the dead", set: { subclass: "Phantom" }, next: "race_choice" },
+        { label: "Psychic blade wielder", set: { subclass: "Soulknife" }, next: "race_choice" }
       ]
     },
     bard_subclass: {
       question: "What kind of performer are you?",
       options: [
         { label: "Jack-of-all-trades adventurer", set: { subclass: "College of Lore" }, next: "race_choice" },
-        { label: "Inspiring battlefield leader", set: { subclass: "College of Valor" }, next: "race_choice" }
+        { label: "Inspiring battlefield leader", set: { subclass: "College of Valor" }, next: "race_choice" },
+        { label: "Glamorous fey-touched star", set: { subclass: "College of Glamour" }, next: "race_choice" },
+        { label: "Duelist with blade and song", set: { subclass: "College of Swords" }, next: "race_choice" },
+        { label: "Whispers and shadowy secrets", set: { subclass: "College of Whispers" }, next: "race_choice" },
+        { label: "Artist who crafts magic from creation", set: { subclass: "College of Creation" }, next: "race_choice" },
+        { label: "Silver-tongued master of inspiration", set: { subclass: "College of Eloquence" }, next: "race_choice" }
       ]
     },
     wizard_subclass: {
@@ -129,14 +160,22 @@ const decisionTree = {
         { label: "Blasting magic", set: { subclass: "School of Evocation" }, next: "race_choice" },
         { label: "Illusions and deception", set: { subclass: "School of Illusion" }, next: "race_choice" },
         { label: "Necromancy and life force", set: { subclass: "School of Necromancy" }, next: "race_choice" },
-        { label: "Shaping and changing matter", set: { subclass: "School of Transmutation" }, next: "race_choice" }
+        { label: "Shaping and changing matter", set: { subclass: "School of Transmutation" }, next: "race_choice" },
+        { label: "Battlefield strategist", set: { subclass: "War Magic" }, next: "race_choice" },
+        { label: "Elegant swordmage", set: { subclass: "Bladesinging" }, next: "race_choice" },
+        { label: "Living spellbook and arcane scribe", set: { subclass: "Order of Scribes" }, next: "race_choice" }
       ]
     },
     sorcerer_subclass: {
       question: "What fuels your innate magic?",
       options: [
         { label: "Dragon bloodline", set: { subclass: "Draconic Bloodline" }, next: "race_choice" },
-        { label: "Unpredictable wild magic", set: { subclass: "Wild Magic" }, next: "race_choice" }
+        { label: "Unpredictable wild magic", set: { subclass: "Wild Magic" }, next: "race_choice" },
+        { label: "Blessed by divine power", set: { subclass: "Divine Soul" }, next: "race_choice" },
+        { label: "Shadowy magic from the dark", set: { subclass: "Shadow Magic" }, next: "race_choice" },
+        { label: "Storm and sky within you", set: { subclass: "Storm Sorcery" }, next: "race_choice" },
+        { label: "Mind touched by the Far Realm", set: { subclass: "Aberrant Mind" }, next: "race_choice" },
+        { label: "Clockwork order and cosmic balance", set: { subclass: "Clockwork Soul" }, next: "race_choice" }
       ]
     },
     warlock_subclass: {
@@ -144,7 +183,11 @@ const decisionTree = {
       options: [
         { label: "A powerful fiend", set: { subclass: "The Fiend" }, next: "race_choice" },
         { label: "An ancient archfey", set: { subclass: "The Archfey" }, next: "race_choice" },
-        { label: "A mysterious Great Old One", set: { subclass: "The Great Old One" }, next: "race_choice" }
+        { label: "A mysterious Great Old One", set: { subclass: "The Great Old One" }, next: "race_choice" },
+        { label: "A radiant celestial", set: { subclass: "The Celestial" }, next: "race_choice" },
+        { label: "A shadowy hexblade", set: { subclass: "The Hexblade" }, next: "race_choice" },
+        { label: "An oceanic horror", set: { subclass: "The Fathomless" }, next: "race_choice" },
+        { label: "A powerful genie", set: { subclass: "The Genie" }, next: "race_choice" }
       ]
     },
     cleric_subclass: {
@@ -156,14 +199,23 @@ const decisionTree = {
         { label: "Nature and the wilds", set: { subclass: "Nature Domain" }, next: "race_choice" },
         { label: "Storms and thunder", set: { subclass: "Tempest Domain" }, next: "race_choice" },
         { label: "War and battle", set: { subclass: "War Domain" }, next: "race_choice" },
-        { label: "Trickery and mischief", set: { subclass: "Trickery Domain" }, next: "race_choice" }
+        { label: "Trickery and mischief", set: { subclass: "Trickery Domain" }, next: "race_choice" },
+        { label: "Divine forge and craftsmanship", set: { subclass: "Forge Domain" }, next: "race_choice" },
+        { label: "Guardian of the grave", set: { subclass: "Grave Domain" }, next: "race_choice" },
+        { label: "Disciplined cosmic order", set: { subclass: "Order Domain" }, next: "race_choice" },
+        { label: "Peaceful protector and healer", set: { subclass: "Peace Domain" }, next: "race_choice" },
+        { label: "Twilight guardian and ward", set: { subclass: "Twilight Domain" }, next: "race_choice" }
       ]
     },
     druid_subclass: {
       question: "How do you channel nature?",
       options: [
         { label: "Transform into animals", set: { subclass: "Circle of the Moon" }, next: "race_choice" },
-        { label: "Spellcasting and nature wisdom", set: { subclass: "Circle of the Land" }, next: "race_choice" }
+        { label: "Spellcasting and nature wisdom", set: { subclass: "Circle of the Land" }, next: "race_choice" },
+        { label: "Dreams and fey magic", set: { subclass: "Circle of Dreams" }, next: "race_choice" },
+        { label: "Guardian of beasts and spirits", set: { subclass: "Circle of the Shepherd" }, next: "race_choice" },
+        { label: "Starry constellations", set: { subclass: "Circle of Stars" }, next: "race_choice" },
+        { label: "Wildfire and renewal", set: { subclass: "Circle of Wildfire" }, next: "race_choice" }
       ]
     },
     paladin_subclass: {
@@ -171,7 +223,11 @@ const decisionTree = {
       options: [
         { label: "Justice and honor", set: { subclass: "Oath of Devotion" }, next: "race_choice" },
         { label: "Ancient nature and light", set: { subclass: "Oath of the Ancients" }, next: "race_choice" },
-        { label: "Vengeance and retribution", set: { subclass: "Oath of Vengeance" }, next: "race_choice" }
+        { label: "Vengeance and retribution", set: { subclass: "Oath of Vengeance" }, next: "race_choice" },
+        { label: "Conquest and iron will", set: { subclass: "Oath of Conquest" }, next: "race_choice" },
+        { label: "Redemption and mercy", set: { subclass: "Oath of Redemption" }, next: "race_choice" },
+        { label: "Heroic glory and inspiration", set: { subclass: "Oath of Glory" }, next: "race_choice" },
+        { label: "Watchers against extraplanar threats", set: { subclass: "Oath of the Watchers" }, next: "race_choice" }
       ]
     },
     race_choice: {
