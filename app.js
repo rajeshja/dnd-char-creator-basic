@@ -3,7 +3,7 @@ const decisionTree = {
   metadata: {
     level: 3,
     notes:
-      "Character creation decision tree for beginner-friendly D&D wizard. Alignment is computed by combining alignment_axis1 and alignment_axis2."
+      "Character creation decision tree for beginner-friendly D&D heroes. Alignment is computed by combining alignment_axis1 and alignment_axis2."
   },
   nodes: {
     playstyle: {
@@ -122,9 +122,14 @@ const decisionTree = {
     wizard_subclass: {
       question: "What school of magic do you specialize in?",
       options: [
+        { label: "Protective wards and barriers", set: { subclass: "School of Abjuration" }, next: "race_choice" },
+        { label: "Summoning and teleportation", set: { subclass: "School of Conjuration" }, next: "race_choice" },
+        { label: "Foresight and fate-reading", set: { subclass: "School of Divination" }, next: "race_choice" },
+        { label: "Charming and influencing minds", set: { subclass: "School of Enchantment" }, next: "race_choice" },
         { label: "Blasting magic", set: { subclass: "School of Evocation" }, next: "race_choice" },
         { label: "Illusions and deception", set: { subclass: "School of Illusion" }, next: "race_choice" },
-        { label: "Necromancy and life force", set: { subclass: "School of Necromancy" }, next: "race_choice" }
+        { label: "Necromancy and life force", set: { subclass: "School of Necromancy" }, next: "race_choice" },
+        { label: "Shaping and changing matter", set: { subclass: "School of Transmutation" }, next: "race_choice" }
       ]
     },
     sorcerer_subclass: {
@@ -145,7 +150,11 @@ const decisionTree = {
     cleric_subclass: {
       question: "What kind of divine power do you serve?",
       options: [
+        { label: "Knowledge and secrets", set: { subclass: "Knowledge Domain" }, next: "race_choice" },
         { label: "Life and healing", set: { subclass: "Life Domain" }, next: "race_choice" },
+        { label: "Light and radiant power", set: { subclass: "Light Domain" }, next: "race_choice" },
+        { label: "Nature and the wilds", set: { subclass: "Nature Domain" }, next: "race_choice" },
+        { label: "Storms and thunder", set: { subclass: "Tempest Domain" }, next: "race_choice" },
         { label: "War and battle", set: { subclass: "War Domain" }, next: "race_choice" },
         { label: "Trickery and mischief", set: { subclass: "Trickery Domain" }, next: "race_choice" }
       ]
