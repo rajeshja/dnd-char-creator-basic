@@ -22,7 +22,13 @@
         </div>
       </header>
 
+      <nav class="page-nav" aria-label="Page navigation">
+          <button class="ghost-button" id="show-character" type="button">Character Creator</button>
+          <button class="ghost-button" id="show-encounter" type="button">Encounter Calculator</button>
+        </nav>
+
       <main>
+        <section class="creator-page" id="character-page">
         <section class="question-card" aria-live="polite">
           <p class="question-label">Question</p>
           <h2 id="question">Loading your adventure...</h2>
@@ -52,6 +58,86 @@
           <div class="result-actions">
             <button class="primary-button" id="start-over" type="button">Start Over</button>
           </div>
+        </section>
+      </section>
+
+        <section class="encounter-page" id="encounter-page" hidden>
+          <section class="question-card">
+            <p class="question-label">Encounter Probability Calculator</p>
+            <h2>Estimate victory chance using probabilistic combat math</h2>
+            <p class="muted">All calculations run in your browser and can be saved locally.</p>
+          </section>
+
+          <section class="summary-card">
+            <h3>Party Inputs</h3>
+            <div class="form-grid">
+              <label>Party size<input id="party-size" type="number" min="1" value="4" /></label>
+              <label>HP per character<input id="party-hp" type="number" min="1" value="32" /></label>
+              <label>Average AC<input id="party-ac" type="number" min="1" value="16" /></label>
+              <label>Attack bonus<input id="party-attack-bonus" type="number" value="6" /></label>
+              <label>Attacks per round each<input id="party-attacks" type="number" min="1" value="1" /></label>
+              <label>Damage dice (e.g. 1d8+4)<input id="party-damage" type="text" value="1d8+4" /></label>
+              <label>Attack mode
+                <select id="party-attack-mode">
+                  <option value="normal">Normal</option>
+                  <option value="advantage">Advantage</option>
+                  <option value="disadvantage">Disadvantage</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="summary-card">
+            <h3>Monster Inputs</h3>
+            <div class="form-grid">
+              <label>Monster count<input id="monster-count" type="number" min="1" value="1" /></label>
+              <label>HP per monster<input id="monster-hp" type="number" min="1" value="135" /></label>
+              <label>Monster AC<input id="monster-ac" type="number" min="1" value="18" /></label>
+              <label>Attack bonus<input id="monster-attack-bonus" type="number" value="8" /></label>
+              <label>Attacks per round<input id="monster-attacks" type="number" min="1" value="2" /></label>
+              <label>Damage dice<input id="monster-damage" type="text" value="2d8+4" /></label>
+              <label>Legendary actions per round<input id="legendary-actions" type="number" min="0" value="1" /></label>
+              <label>Legendary action damage<input id="legendary-damage" type="text" value="1d8+4" /></label>
+              <label>Lair action damage<input id="lair-damage" type="text" value="0" /></label>
+              <label>Lair trigger frequency (per round)<input id="lair-frequency" type="number" min="0" step="0.1" value="1" /></label>
+              <label>Lair control multiplier
+                <input id="lair-control" type="number" min="0.4" max="1.2" step="0.05" value="0.9" />
+              </label>
+              <label>Attack mode
+                <select id="monster-attack-mode">
+                  <option value="normal">Normal</option>
+                  <option value="advantage">Advantage</option>
+                  <option value="disadvantage">Disadvantage</option>
+                </select>
+              </label>
+            </div>
+            <div class="inline-options">
+              <label><input id="focus-fire" type="checkbox" checked /> Party focus fire</label>
+              <label><input id="frontliner-bias" type="checkbox" /> Frontliner bias on monster attacks</label>
+            </div>
+            <div class="copy-actions">
+              <button class="primary-button" id="calculate-encounter" type="button">Calculate Probabilities</button>
+              <button class="ghost-button" id="save-encounter" type="button">Save Inputs</button>
+              <button class="ghost-button" id="load-encounter" type="button">Load Inputs</button>
+            </div>
+          </section>
+
+          <section class="result-card" id="encounter-result" hidden>
+            <h3>Encounter Outcome Estimate</h3>
+            <p class="result-text" id="encounter-summary"></p>
+            <ul class="summary-list" id="encounter-metrics"></ul>
+            <div class="chart-row">
+              <div>
+                <h4>Party Damage / Round Distribution</h4>
+                <div id="party-chart" class="chart"></div>
+              </div>
+              <div>
+                <h4>Monster Damage / Round Distribution</h4>
+                <div id="monster-chart" class="chart"></div>
+              </div>
+            </div>
+            <div class="rules-note" id="rules-note"></div>
+          </section>
         </section>
       </main>
 

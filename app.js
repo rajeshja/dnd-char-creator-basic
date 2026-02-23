@@ -495,3 +495,395 @@ if (copyButton) {
 
 updateSummary();
 renderNode();
+
+// Encounter calculator page
+const characterPage = document.getElementById("character-page");
+const encounterPage = document.getElementById("encounter-page");
+const showCharacterBtn = document.getElementById("show-character");
+const showEncounterBtn = document.getElementById("show-encounter");
+
+const switchPage = (page) => {
+  const isEncounter = page === "encounter";
+  if (characterPage) characterPage.hidden = isEncounter;
+  if (encounterPage) encounterPage.hidden = !isEncounter;
+  if (backButton) backButton.hidden = isEncounter;
+  if (showCharacterBtn) showCharacterBtn.disabled = !isEncounter;
+  if (showEncounterBtn) showEncounterBtn.disabled = isEncounter;
+};
+
+showCharacterBtn?.addEventListener("click", () => switchPage("character"));
+showEncounterBtn?.addEventListener("click", () => switchPage("encounter"));
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const roundKey = (value) => Math.round(value * 10) / 10;
+
+const parseDamageExpression = (expression) => {
+  const clean = String(expression).trim().toLowerCase();
+  if (/^\d+$/.test(clean)) {
+    return { diceCount: 0, sides: 0, modifier: Number(clean) };
+  }
+  const match = clean.match(/^(\d+)d(\d+)([+-]\d+)?$/);
+  if (!match) {
+    throw new Error(`Invalid damage expression: ${expression}`);
+  }
+  return {
+    diceCount: Number(match[1]),
+    sides: Number(match[2]),
+    modifier: Number(match[3] ?? 0)
+  };
+};
+
+const singleDieDistribution = (sides) => {
+  const out = new Map();
+  for (let i = 1; i <= sides; i += 1) {
+    out.set(i, 1 / sides);
+  }
+  return out;
+};
+
+const convolve = (a, b) => {
+  const out = new Map();
+  a.forEach((pA, dA) => {
+    b.forEach((pB, dB) => {
+      const key = roundKey(Number(dA) + Number(dB));
+      out.set(key, (out.get(key) ?? 0) + pA * pB);
+    });
+  });
+  return normalizeDistribution(out);
+};
+
+const normalizeDistribution = (dist) => {
+  const total = [...dist.values()].reduce((sum, p) => sum + p, 0);
+  if (total <= 0) return new Map([[0, 1]]);
+  const out = new Map();
+  dist.forEach((p, d) => {
+    if (p > 0) out.set(Number(d), p / total);
+  });
+  return out;
+};
+
+const cappedDistribution = (dist, maxEntries = 280) => {
+  if (dist.size <= maxEntries) return dist;
+  const entries = [...dist.entries()].sort((a, b) => a[0] - b[0]);
+  const min = entries[0][0];
+  const max = entries[entries.length - 1][0];
+  const binWidth = Math.max(1, (max - min) / maxEntries);
+  const binned = new Map();
+  entries.forEach(([damage, prob]) => {
+    const bin = min + Math.floor((damage - min) / binWidth) * binWidth;
+    const key = roundKey(bin);
+    binned.set(key, (binned.get(key) ?? 0) + prob);
+  });
+  return normalizeDistribution(binned);
+};
+
+const buildDamageDistribution = (expression, crit = false) => {
+  const parsed = parseDamageExpression(expression);
+  let distribution = new Map([[0, 1]]);
+  const diceCount = crit ? parsed.diceCount * 2 : parsed.diceCount;
+  for (let i = 0; i < diceCount; i += 1) {
+    distribution = convolve(distribution, singleDieDistribution(parsed.sides));
+  }
+  const shifted = new Map();
+  distribution.forEach((prob, damage) => {
+    shifted.set(Math.max(0, damage + parsed.modifier), prob);
+  });
+  return normalizeDistribution(shifted);
+};
+
+const repeatConvolve = (dist, times) => {
+  let result = new Map([[0, 1]]);
+  for (let i = 0; i < times; i += 1) {
+    result = cappedDistribution(convolve(result, dist));
+  }
+  return result;
+};
+
+const getHitRates = (attackBonus, targetAC, mode = "normal", baseCrit = 0.05) => {
+  const baseHit = clamp((21 + attackBonus - targetAC) / 20, 0.05, 0.95);
+  const hit =
+    mode === "advantage"
+      ? 1 - (1 - baseHit) ** 2
+      : mode === "disadvantage"
+        ? baseHit ** 2
+        : baseHit;
+  const crit =
+    mode === "advantage" ? 1 - (1 - baseCrit) ** 2 : mode === "disadvantage" ? baseCrit ** 2 : baseCrit;
+  return {
+    hit: clamp(hit, 0.05, 0.9975),
+    crit: clamp(crit, 0.0025, 0.5)
+  };
+};
+
+const buildAttackDistribution = ({ attackBonus, targetAC, damageExpr, mode, critChance = 0.05 }) => {
+  const { hit, crit } = getHitRates(attackBonus, targetAC, mode, critChance);
+  const critRate = Math.min(hit, crit);
+  const normalHitRate = Math.max(0, hit - critRate);
+  const missRate = Math.max(0, 1 - normalHitRate - critRate);
+
+  const normalDist = buildDamageDistribution(damageExpr, false);
+  const critDist = buildDamageDistribution(damageExpr, true);
+
+  const out = new Map([[0, missRate]]);
+  normalDist.forEach((prob, damage) => {
+    out.set(damage, (out.get(damage) ?? 0) + prob * normalHitRate);
+  });
+  critDist.forEach((prob, damage) => {
+    out.set(damage, (out.get(damage) ?? 0) + prob * critRate);
+  });
+  return cappedDistribution(normalizeDistribution(out));
+};
+
+const scaleDistribution = (dist, scalar) => {
+  const scaled = new Map();
+  dist.forEach((prob, damage) => {
+    const key = roundKey(Math.max(0, damage * scalar));
+    scaled.set(key, (scaled.get(key) ?? 0) + prob);
+  });
+  return normalizeDistribution(scaled);
+};
+
+const updateHpPmf = (hpPmf, damageDist, capHp) => {
+  const next = new Map();
+  hpPmf.forEach((hpProb, hp) => {
+    damageDist.forEach((dProb, damage) => {
+      const remaining = clamp(roundKey(hp - damage), 0, capHp);
+      next.set(remaining, (next.get(remaining) ?? 0) + hpProb * dProb);
+    });
+  });
+  return cappedDistribution(normalizeDistribution(next), 320);
+};
+
+const probabilityZeroHp = (pmf) => pmf.get(0) ?? 0;
+const probabilityAlive = (pmf) => 1 - probabilityZeroHp(pmf);
+
+const distributionStats = (dist) => {
+  let mean = 0;
+  dist.forEach((prob, damage) => {
+    mean += damage * prob;
+  });
+  let variance = 0;
+  dist.forEach((prob, damage) => {
+    variance += ((damage - mean) ** 2) * prob;
+  });
+  return { mean, variance };
+};
+
+const calcDifficultyBand = (partyWinChance) => {
+  if (partyWinChance >= 0.8) return "Easy";
+  if (partyWinChance >= 0.62) return "Medium";
+  if (partyWinChance >= 0.45) return "Hard";
+  return "Deadly";
+};
+
+const renderDistChart = (containerId, dist) => {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const sorted = [...dist.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const maxProb = sorted[0]?.[1] ?? 1;
+  el.innerHTML = "";
+  sorted.forEach(([damage, prob]) => {
+    const label = document.createElement("div");
+    label.className = "chart-label";
+    label.innerHTML = `<span>${damage.toFixed(1)} dmg</span><span>${(prob * 100).toFixed(1)}%</span>`;
+    const bar = document.createElement("div");
+    bar.className = "chart-bar";
+    bar.style.width = `${(prob / maxProb) * 100}%`;
+    el.appendChild(label);
+    el.appendChild(bar);
+  });
+};
+
+const encounterInputIds = [
+  "party-size","party-hp","party-ac","party-attack-bonus","party-attacks","party-damage","party-attack-mode",
+  "monster-count","monster-hp","monster-ac","monster-attack-bonus","monster-attacks","monster-damage",
+  "legendary-actions","legendary-damage","lair-damage","lair-frequency","lair-control","monster-attack-mode",
+  "focus-fire","frontliner-bias"
+];
+
+const getInputValue = (id) => {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  return el.type === "checkbox" ? el.checked : el.value;
+};
+
+const setInputValue = (id, value) => {
+  const el = document.getElementById(id);
+  if (!el || value == null) return;
+  if (el.type === "checkbox") {
+    el.checked = Boolean(value);
+  } else {
+    el.value = value;
+  }
+};
+
+const saveEncounterInputs = () => {
+  const payload = {};
+  encounterInputIds.forEach((id) => {
+    payload[id] = getInputValue(id);
+  });
+  localStorage.setItem("encounter-calc-inputs", JSON.stringify(payload));
+};
+
+const loadEncounterInputs = () => {
+  const raw = localStorage.getItem("encounter-calc-inputs");
+  if (!raw) return;
+  const parsed = JSON.parse(raw);
+  encounterInputIds.forEach((id) => setInputValue(id, parsed[id]));
+};
+
+const toNumber = (id) => Number(getInputValue(id));
+
+const calculateEncounter = () => {
+  const partySize = Math.max(1, toNumber("party-size"));
+  const partyHpEach = Math.max(1, toNumber("party-hp"));
+  const partyAc = Math.max(1, toNumber("party-ac"));
+  const partyAttackBonus = toNumber("party-attack-bonus");
+  const partyAttacks = Math.max(1, toNumber("party-attacks"));
+  const partyDamage = getInputValue("party-damage");
+  const partyMode = getInputValue("party-attack-mode");
+
+  const monsterCount = Math.max(1, toNumber("monster-count"));
+  const monsterHpEach = Math.max(1, toNumber("monster-hp"));
+  const monsterAc = Math.max(1, toNumber("monster-ac"));
+  const monsterAttackBonus = toNumber("monster-attack-bonus");
+  const monsterAttacks = Math.max(1, toNumber("monster-attacks"));
+  const monsterDamage = getInputValue("monster-damage");
+  const monsterMode = getInputValue("monster-attack-mode");
+  const legendaryActions = Math.max(0, toNumber("legendary-actions"));
+  const legendaryDamage = getInputValue("legendary-damage");
+  const lairDamage = getInputValue("lair-damage");
+  const lairFrequency = Math.max(0, toNumber("lair-frequency"));
+  const lairControl = clamp(toNumber("lair-control"), 0.4, 1.2);
+  const focusFire = Boolean(getInputValue("focus-fire"));
+  const frontlinerBias = Boolean(getInputValue("frontliner-bias"));
+
+  const partyAttackDist = buildAttackDistribution({
+    attackBonus: partyAttackBonus,
+    targetAC: monsterAc,
+    damageExpr: partyDamage,
+    mode: partyMode
+  });
+  const partyPerCharacterDist = repeatConvolve(partyAttackDist, partyAttacks);
+  const targetEfficiency = focusFire ? 1 : 0.85;
+  const partyRoundDist = scaleDistribution(repeatConvolve(partyPerCharacterDist, partySize), targetEfficiency * lairControl);
+
+  const monsterAttackDist = buildAttackDistribution({
+    attackBonus: monsterAttackBonus,
+    targetAC: partyAc,
+    damageExpr: monsterDamage,
+    mode: monsterMode
+  });
+  const legendaryDist = legendaryActions > 0 ? repeatConvolve(buildAttackDistribution({
+    attackBonus: monsterAttackBonus,
+    targetAC: partyAc,
+    damageExpr: legendaryDamage,
+    mode: monsterMode
+  }), legendaryActions) : new Map([[0, 1]]);
+
+  const lairBaseDist = buildDamageDistribution(lairDamage, false);
+  const lairWeighted = scaleDistribution(lairBaseDist, lairFrequency);
+  const monsterRoundBase = convolve(repeatConvolve(monsterAttackDist, monsterAttacks), legendaryDist);
+  const monsterRoundDist = scaleDistribution(convolve(monsterRoundBase, lairWeighted), frontlinerBias ? 1.15 : 1);
+  const monsterTotalRoundDist = repeatConvolve(monsterRoundDist, monsterCount);
+
+  const totalPartyHp = partySize * partyHpEach;
+  const totalMonsterHp = monsterCount * monsterHpEach;
+
+  let partyHpPmf = new Map([[totalPartyHp, 1]]);
+  let monsterHpPmf = new Map([[totalMonsterHp, 1]]);
+
+  const maxRounds = 20;
+  let unresolvedProb = 1;
+  let partyWinProb = 0;
+  let monsterWinProb = 0;
+  let mutualWipeProb = 0;
+  let expectedRounds = 0;
+
+  for (let round = 1; round <= maxRounds; round += 1) {
+    const partyAliveFactor = probabilityAlive(partyHpPmf);
+    const monsterAliveFactor = probabilityAlive(monsterHpPmf);
+
+    const incomingToMonster = scaleDistribution(partyRoundDist, partyAliveFactor);
+    const incomingToParty = scaleDistribution(monsterTotalRoundDist, monsterAliveFactor);
+
+    monsterHpPmf = updateHpPmf(monsterHpPmf, incomingToMonster, totalMonsterHp);
+    partyHpPmf = updateHpPmf(partyHpPmf, incomingToParty, totalPartyHp);
+
+    const pMonDead = probabilityZeroHp(monsterHpPmf);
+    const pPartyDead = probabilityZeroHp(partyHpPmf);
+    const pMonAlive = 1 - pMonDead;
+    const pPartyAlive = 1 - pPartyDead;
+
+    const cumulativePartyWin = pMonDead * pPartyAlive;
+    const cumulativeMonsterWin = pPartyDead * pMonAlive;
+    const cumulativeMutual = pMonDead * pPartyDead;
+    const cumulativeResolved = cumulativePartyWin + cumulativeMonsterWin + cumulativeMutual;
+
+    const resolvedThisRound = Math.max(0, cumulativeResolved - (1 - unresolvedProb));
+    expectedRounds += round * resolvedThisRound;
+    unresolvedProb = Math.max(0, 1 - cumulativeResolved);
+
+    partyWinProb = cumulativePartyWin;
+    monsterWinProb = cumulativeMonsterWin;
+    mutualWipeProb = cumulativeMutual;
+  }
+
+  expectedRounds += maxRounds * unresolvedProb;
+
+  const partyStats = distributionStats(partyRoundDist);
+  const monsterStats = distributionStats(monsterTotalRoundDist);
+  const swinginess = Math.sqrt((partyStats.variance + monsterStats.variance) / 2);
+
+  const metrics = [
+    ["Party win chance", `${(partyWinProb * 100).toFixed(1)}%`],
+    ["Monster win chance", `${(monsterWinProb * 100).toFixed(1)}%`],
+    ["Mutual wipe", `${(mutualWipeProb * 100).toFixed(2)}%`],
+    ["Expected rounds", expectedRounds.toFixed(2)],
+    ["Difficulty", calcDifficultyBand(partyWinProb)],
+    ["Swinginess", `${swinginess.toFixed(2)} dmg σ`],
+    ["Party EDPR", partyStats.mean.toFixed(2)],
+    ["Monster EDPR", monsterStats.mean.toFixed(2)]
+  ];
+
+  const metricsEl = document.getElementById("encounter-metrics");
+  if (metricsEl) {
+    metricsEl.innerHTML = "";
+    metrics.forEach(([label, value]) => {
+      const item = document.createElement("li");
+      item.className = "summary-item";
+      item.innerHTML = `<strong>${label}</strong><span>${value}</span>`;
+      metricsEl.appendChild(item);
+    });
+  }
+
+  const resultEl = document.getElementById("encounter-result");
+  const summaryElEncounter = document.getElementById("encounter-summary");
+  if (summaryElEncounter) {
+    summaryElEncounter.textContent = `Estimated ${calcDifficultyBand(partyWinProb)} encounter: party win chance ${(partyWinProb * 100).toFixed(1)}%, monster win chance ${(monsterWinProb * 100).toFixed(1)}%.`;
+  }
+  if (resultEl) resultEl.hidden = false;
+
+  renderDistChart("party-chart", partyRoundDist);
+  renderDistChart("monster-chart", monsterTotalRoundDist);
+
+  const rulesNote = document.getElementById("rules-note");
+  if (rulesNote) {
+    rulesNote.innerHTML = `
+      <strong>Model assumptions:</strong> P(hit) = clamp((21 + attackBonus - targetAC) / 20) with natural 1/20 bounds, critical hits default to 5% (adjusted for advantage/disadvantage), damage distributions are convolved per attack and per round, lair and legendary effects are folded into monster round damage, and HP is tracked as probability mass across rounds.<br>
+      <strong>Important:</strong> This is a statistical estimate, not a tactical simulator. Initiative order, spell choice, battlefield control, and player decisions can materially change outcomes.
+    `;
+  }
+};
+
+document.getElementById("calculate-encounter")?.addEventListener("click", () => {
+  try {
+    calculateEncounter();
+  } catch (error) {
+    alert(error.message);
+  }
+});
+document.getElementById("save-encounter")?.addEventListener("click", saveEncounterInputs);
+document.getElementById("load-encounter")?.addEventListener("click", loadEncounterInputs);
+
+switchPage("character");
