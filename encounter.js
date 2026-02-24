@@ -265,7 +265,7 @@ const actorCard = (actor, type, index) => {
               <section class="mini-action-card" data-monster-index="${index}" data-action-index="${actionIndex}">
                 <div class="actor-card-header">
                   <strong>Action ${actionIndex + 1}</strong>
-                  <button class="ghost-button remove-legendary" type="button" ${actor.legendaryActions.length <= 1 ? "disabled" : ""}>Remove</button>
+                  <button class="ghost-button remove-legendary" type="button">Remove</button>
                 </div>
                 ${actionFields("legendary", action, actionIndex)}
               </section>
@@ -342,10 +342,8 @@ const syncActorInputs = () => {
       card.querySelectorAll(".mini-action-card").forEach((actionCard) => {
         const actionIndex = Number(actionCard.dataset.actionIndex);
         actionCard.querySelector(".remove-legendary")?.addEventListener("click", () => {
-          if (monsterActors[idx].legendaryActions.length > 1) {
-            monsterActors[idx].legendaryActions.splice(actionIndex, 1);
-            renderActors();
-          }
+          monsterActors[idx].legendaryActions.splice(actionIndex, 1);
+          renderActors();
         });
         actionCard.querySelectorAll("input, select").forEach((input) => {
           input.addEventListener("input", () => {
@@ -563,7 +561,7 @@ const loadEncounter = () => {
     ? data.monsterActors.map((monster) => ({
         ...defaultMonster(),
         ...monster,
-        legendaryActions: monster.legendaryActions?.length ? monster.legendaryActions : [defaultLegendaryAction()]
+        legendaryActions: Array.isArray(monster.legendaryActions) ? monster.legendaryActions : [defaultLegendaryAction()]
       }))
     : [defaultMonster()];
   lairActions = data.lairActions?.length ? data.lairActions : [defaultLairAction()];
