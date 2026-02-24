@@ -200,6 +200,14 @@ const updateHpPmf = (hpPmf, damageDist, capHp) => {
 const probabilityZeroHp = (pmf) => pmf.get(0) ?? 0;
 const probabilityAlive = (pmf) => 1 - probabilityZeroHp(pmf);
 
+const probabilityHpAtMost = (pmf, threshold) => {
+  let total = 0;
+  pmf.forEach((prob, hp) => {
+    if (hp > 0 && hp <= threshold) total += prob;
+  });
+  return total;
+};
+
 const distributionStats = (dist) => {
   let mean = 0;
   dist.forEach((p, d) => {
@@ -468,6 +476,7 @@ const calculateEncounter = () => {
 
   const totalPartyHp = partyActors.reduce((sum, p) => sum + Number(p.hp), 0);
   const totalMonsterHp = monsterActors.reduce((sum, m) => sum + Number(m.hp), 0);
+  const minPcHp = Math.min(...partyActors.map((p) => Number(p.hp)));
 
   let partyHpPmf = new Map([[totalPartyHp, 1]]);
   let monsterHpPmf = new Map([[totalMonsterHp, 1]]);
@@ -476,7 +485,7 @@ const calculateEncounter = () => {
   let unresolvedProb = 1;
   let partyWinProb = 0;
   let monsterWinProb = 0;
-  let mutualWipeProb = 0;
+  let partyWinSomeDeathsProb = 0;
   let expectedRounds = 0;
 
   for (let round = 1; round <= maxRounds; round += 1) {
@@ -488,10 +497,13 @@ const calculateEncounter = () => {
 
     const pMonDead = probabilityZeroHp(monsterHpPmf);
     const pPartyDead = probabilityZeroHp(partyHpPmf);
-    const cumulativePartyWin = pMonDead * (1 - pPartyDead);
-    const cumulativeMonsterWin = pPartyDead * (1 - pMonDead);
-    const cumulativeMutual = pPartyDead * pMonDead;
-    const cumulativeResolved = cumulativePartyWin + cumulativeMonsterWin + cumulativeMutual;
+    const pPartyAlive = 1 - pPartyDead;
+    const pPartyAliveButWornDown = probabilityHpAtMost(partyHpPmf, Math.max(0, totalPartyHp - minPcHp));
+
+    const cumulativePartyWin = pMonDead * pPartyAlive;
+    const cumulativeMonsterWin = pPartyDead;
+    const cumulativePartyWinSomeDeaths = pMonDead * pPartyAliveButWornDown;
+    const cumulativeResolved = cumulativePartyWin + cumulativeMonsterWin;
 
     const resolvedThisRound = Math.max(0, cumulativeResolved - (1 - unresolvedProb));
     expectedRounds += round * resolvedThisRound;
@@ -499,7 +511,7 @@ const calculateEncounter = () => {
 
     partyWinProb = cumulativePartyWin;
     monsterWinProb = cumulativeMonsterWin;
-    mutualWipeProb = cumulativeMutual;
+    partyWinSomeDeathsProb = cumulativePartyWinSomeDeaths;
   }
 
   expectedRounds += maxRounds * unresolvedProb;
@@ -511,7 +523,7 @@ const calculateEncounter = () => {
   const metrics = [
     ["Party win chance", `${(partyWinProb * 100).toFixed(1)}%`],
     ["Monster win chance", `${(monsterWinProb * 100).toFixed(1)}%`],
-    ["Mutual wipe", `${(mutualWipeProb * 100).toFixed(2)}%`],
+    ["Party win with some PCs dying", `${(partyWinSomeDeathsProb * 100).toFixed(2)}%`],
     ["Expected rounds", expectedRounds.toFixed(2)],
     ["Difficulty", calcDifficultyBand(partyWinProb)],
     ["Swinginess", `${swinginess.toFixed(2)} dmg σ`],
@@ -536,7 +548,7 @@ const calculateEncounter = () => {
 
   document.getElementById("rules-note").innerHTML = `
     <strong>Legendary/lair save handling:</strong> save-based actions use P(fail) = clamp((21 + saveDC - targetSaveBonus) / 20), and the configured “on successful save” outcome (none/half/full) is applied to damage distribution.<br>
-    <strong>Model assumptions:</strong> attack actions use P(hit) = clamp((21 + attackBonus - targetAC) / 20) with natural 1/20 bounds and crit handling (adjusted for advantage/disadvantage). HP is tracked as probability mass across rounds.
+    <strong>Model assumptions:</strong> attack actions use P(hit) = clamp((21 + attackBonus - targetAC) / 20) with natural 1/20 bounds and crit handling (adjusted for advantage/disadvantage). HP is tracked as probability mass across rounds. "Party win with some PCs dying" is estimated from remaining party HP relative to the weakest PC's HP threshold.
   `;
 };
 
