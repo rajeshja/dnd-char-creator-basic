@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>D&D Encounter Probability Calculator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="site-header">
+        <div>
+          <p class="eyebrow">Dungeons &amp; Dragons</p>
+          <h1>Encounter Probability Calculator</h1>
+          <p class="subtitle">Estimate encounter difficulty, win chance, and combat duration with browser-only probability math.</p>
+        </div>
+        <div class="header-actions">
+          <a class="ghost-button nav-link" href="index.html">Character Creator</a>
+        </div>
+      </header>
+
+      <main class="encounter-main">
+        <section class="question-card">
+          <p class="question-label">Encounter Inputs</p>
+          <h2>Configure each actor separately</h2>
+          <p class="muted">Add party members, monsters, and action profiles for granular combat estimates.</p>
+        </section>
+
+        <section class="summary-card">
+          <header>
+            <h3>Party Members</h3>
+            <button class="ghost-button" id="add-party-member" type="button">+ Add PC</button>
+          </header>
+          <div id="party-list" class="actor-list"></div>
+        </section>
+
+        <section class="summary-card">
+          <header>
+            <h3>Monsters</h3>
+            <button class="ghost-button" id="add-monster" type="button">+ Add Monster</button>
+          </header>
+          <div id="monster-list" class="actor-list"></div>
+        </section>
+
+        <section class="summary-card">
+          <header>
+            <h3>Lair Actions (Environmental)</h3>
+            <button class="ghost-button" id="add-lair-action" type="button">+ Add Lair Action</button>
+          </header>
+          <div id="lair-list" class="mini-action-list"></div>
+          <div class="form-grid">
+            <label>Lair control multiplier<input id="lair-control" type="number" min="0.4" max="1.2" step="0.05" value="0.9" /></label>
+          </div>
+          <div class="inline-options">
+            <label><input id="focus-fire" type="checkbox" checked /> Party focus fire</label>
+            <label><input id="frontliner-bias" type="checkbox" /> Frontliner bias on monster attacks</label>
+          </div>
+          <div class="copy-actions">
+            <button class="primary-button" id="calculate-encounter" type="button">Calculate Probabilities</button>
+            <button class="ghost-button" id="save-encounter" type="button">Save Inputs</button>
+            <button class="ghost-button" id="load-encounter" type="button">Load Inputs</button>
+          </div>
+        </section>
+
+        <section class="result-card" id="encounter-result" hidden>
+          <h3>Encounter Outcome Estimate</h3>
+          <p class="result-text" id="encounter-summary"></p>
+          <ul class="summary-list" id="encounter-metrics"></ul>
+          <div class="chart-row">
+            <div>
+              <h4>Party Damage / Round Distribution</h4>
+              <div id="party-chart" class="chart"></div>
+            </div>
+            <div>
+              <h4>Monster Damage / Round Distribution</h4>
+              <div id="monster-chart" class="chart"></div>
+            </div>
+          </div>
+          <div class="rules-note" id="rules-note"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="encounter.js"></script>
+  </body>
+</html>
