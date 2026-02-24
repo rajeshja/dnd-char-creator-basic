@@ -343,3 +343,33 @@ main {
   color: var(--muted);
   line-height: 1.4;
 }
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.actor-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.actor-card {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.actor-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.actor-card-header h4 {
+  margin: 0;
+}
