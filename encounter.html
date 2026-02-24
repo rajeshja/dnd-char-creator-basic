@@ -23,7 +23,7 @@
         <section class="question-card">
           <p class="question-label">Encounter Inputs</p>
           <h2>Configure each actor separately</h2>
-          <p class="muted">Add party members and monsters one-by-one for granular combat estimates.</p>
+          <p class="muted">Add party members, monsters, and action profiles for granular combat estimates.</p>
         </section>
 
         <section class="summary-card">
@@ -43,10 +43,12 @@
         </section>
 
         <section class="summary-card">
-          <h3>Encounter Effects</h3>
+          <header>
+            <h3>Lair Actions (Environmental)</h3>
+            <button class="ghost-button" id="add-lair-action" type="button">+ Add Lair Action</button>
+          </header>
+          <div id="lair-list" class="mini-action-list"></div>
           <div class="form-grid">
-            <label>Lair action damage<input id="lair-damage" type="text" value="0" /></label>
-            <label>Lair trigger frequency (per round)<input id="lair-frequency" type="number" min="0" step="0.1" value="1" /></label>
             <label>Lair control multiplier<input id="lair-control" type="number" min="0.4" max="1.2" step="0.05" value="0.9" /></label>
           </div>
           <div class="inline-options">
